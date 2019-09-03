@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  hse_parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      USER_EMAIL: 'some@gmail.com'
+    

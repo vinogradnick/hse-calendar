@@ -1,6 +1,8 @@
 from __future__ import print_function
 import datetime
 import pickle
+import os
+
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -35,7 +37,7 @@ def send_event(msg, start_date, stop_date):
             'timeZone': 'Asia/Yekaterinburg'
         },
         'attendees': [
-            {'email': 'vinogradovnick32@gmail.com'}
+            {'email': os.environ['USER_EMAIL']}
         ],          
     }
     event = service.events().insert(calendarId='primary', body=event).execute()
