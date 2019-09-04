@@ -2,38 +2,83 @@
 ####
 COURSE = "3"
 FILE_NAME = 'test.xlsx'
+COURSE_FIRST_COLUMN = 'E'
 ####
 from openpyxl import load_workbook
 from openpyxl import Workbook
 
-def get_wb(filename):
-    return load_workbook(filename = filename)
+class Lesson:
+    def __init__(self, name, starttime, endtime, date):
+        self.name = name
+        self.starttime = starttime
+        self.endtime = endtime
+        self.date = date
+    def __str__(self):
+        return (self.date.__str__() + " " + self.starttime.__str__() + " " + self.endtime.__str__() + " " + self.name.__str__())
 
-def get_sheets(wb):
-    return [sheet for sheet in wb.sheetnames if COURSE in sheet]
 
-def read_sheet(wb, sheetname):
-    ws = wb[sheetname]
-    cells = []
+def get_all_lessons(file_name):
+    wb = get_wb(file_name)
+    sheets = get_all_sheets(wb)
+    return read_sheets(sheets)
+
+def get_wb(file_name):
+    return load_workbook(filename = file_name)
+
+def get_all_sheets(wb):
+    names = get_sheets_names(wb)
+    sheets =  get_all_sheets_by_names(wb, names)
+    return sheets
+
+def get_all_sheets_by_names(wb, sheet_names):
+    sheets = []
+    for sheet_name in sheet_names:
+        sheets.append(get_sheet(wb, sheet_name))
+    return sheets
+
+def get_sheets_names(wb):
+    return ([sheet for sheet in wb.sheetnames if COURSE in sheet])
+
+def get_sheet(wb, sheet_name):
+    return wb[sheet_name]
+
+def read_sheets(sheets):
+    lessons = []
+    for sheet in sheets:
+        for lesson in (read_sheet(sheet)):
+            lessons.append(lesson)
+    return lessons
+
+def read_sheet(ws):
+    lessons = []
     for i in range(4, 49):
-        cells.append(ws["B"+i.__str__()].value)
-    print(cells)
-    
+        if ws["B"+i.__str__()].value != None:
+            lesson = get_lesson(ws, i, COURSE_FIRST_COLUMN, lessons)
+            if lesson != None:
+                lessons.append(lesson)
+    return lessons
+
+def get_lesson(ws, excelIndex, lessonColumn, lessons):
+    def validate_lesson(lesson, lessons):
+        if lesson.date != None:
+            lesson.date = (lesson.date.split('\n'))[1]
+        if lesson.date == None:
+            lesson.date = lessons[lessons.__len__()-1].date
+        if lesson.name != None:
+            lesson.name = lesson.name.replace('\n', ' ')
+        return lesson
+
+    time = ws["B"+excelIndex.__str__()].value.replace('\n',' ').replace('  ',' ').split(' ')[1].split('-')
+    start_time = time[0]
+    end_time = time[1] 
+    lesson = validate_lesson(Lesson(ws[lessonColumn+excelIndex.__str__()].value, start_time, end_time, ws["A"+excelIndex.__str__()].value), lessons)
+    return lesson
+
 
 def main():
-    wb = get_wb(FILE_NAME)
-    sheets = get_sheets(wb)
-    print(sheets[0])
-    read_sheet(wb, sheets[0])
+    for x in (get_all_lessons(FILE_NAME)):
+        print(x)
 
 if __name__ == '__main__':
     main()
 
-class Lesson:
-    def __init__(self, name, ord, date):
-        self.name = name
-        self.ord = ord
-        self.date = date
-    def __init__(self, name, meta):
-        self.name = name
-        self.meta = meta
