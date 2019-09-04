@@ -5,7 +5,7 @@ FILE_NAME = 'test.xlsx'
 ####
 from openpyxl import load_workbook
 from openpyxl import Workbook
-
+import json_parser
 def get_wb(filename):
     return load_workbook(filename = filename)
 
@@ -17,7 +17,7 @@ def read_sheet(wb, sheetname):
     cells = []
     for i in range(4, 49):
         cells.append(ws["B"+i.__str__()].value)
-    print(cells)
+    print(json_parser.toJson(cells))
     
 
 def main():
