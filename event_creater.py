@@ -1,5 +1,4 @@
 from __future__ import print_function
-import datetime
 import pickle
 import os
 
@@ -7,6 +6,7 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+
 
 def send_event(msg, start_date, stop_date):
     def build_creds():
@@ -25,7 +25,7 @@ def send_event(msg, start_date, stop_date):
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
         return creds
-    service = build('calendar', 'v3', credentials = build_creds())
+    service = build('calendar', 'v3', credentials=build_creds())
     event = {
         'summary': msg,
         'start': {
@@ -37,14 +37,15 @@ def send_event(msg, start_date, stop_date):
             'timeZone': 'Asia/Yekaterinburg'
         },
         'attendees': [
-            {'email': os.environ['USER_EMAIL']}
-        ],          
+            {'email': 'vinogradovnick32@gmail.com'}
+        ],
     }
     event = service.events().insert(calendarId='primary', body=event).execute()
 
 
 def main():
     send_event("ПЛАКСИН ЫЫЫ", '2019-09-04T11:30:00', '2019-09-04T12:50:00')
+
 
 if __name__ == '__main__':
     main()
