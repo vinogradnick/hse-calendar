@@ -1,13 +1,14 @@
-# Variables
-####
 from datetime import datetime, date, time
 import json_parser as jp
 from openpyxl import Workbook
 from openpyxl import load_workbook
-COURSE = "3"
-FILE_NAME = 'test.xlsx'
-COURSE_FIRST_COLUMN = 'E'
+import classes as cl
+import downloader
+import helper
 ####
+MINOR_NAME = 'майнор'
+COURSE = '3'
+COURSE_FIRST_COLUMN = "E"
 
 
 class Lesson:
@@ -32,7 +33,7 @@ def time_convert(dateString, timeString):
     return datet.strftime('%Y-%m-%dT%H:%M:%S')
 
 
-def get_all_lessons(file_name):
+def get_all_lessons(file_name=downloader.FILE_NAME):
     wb = get_wb(file_name)
     sheets = get_all_sheets(wb)
     return read_sheets(sheets)
@@ -40,6 +41,11 @@ def get_all_lessons(file_name):
 
 def get_wb(file_name):
     return load_workbook(filename=file_name)
+
+
+def get_all_sheets(file_name=downloader.FILE_NAME):
+    wb = get_wb(file_name)
+    return get_all_sheets(file_name)
 
 
 def get_all_sheets(wb):
@@ -51,7 +57,7 @@ def get_all_sheets(wb):
 def get_all_sheets_by_names(wb, sheet_names):
     sheets = []
     for sheet_name in sheet_names:
-        sheets.append(get_sheet(wb, sheet_name))
+        sheets.append(cl.Page(sheet_name, get_sheet(wb, sheet_name), MINOR_NAME in sheet_name))
     return sheets
 
 
@@ -71,17 +77,19 @@ def read_sheets(sheets):
     return lessons
 
 
-def read_sheet(ws):
+def read_sheet(page):
     lessons = []
     for i in range(4, 49):
-        if ws["B"+i.__str__()].value != None:
-            lesson = get_lesson(ws, i, COURSE_FIRST_COLUMN, lessons)
+        if page.ws["B"+i.__str__()].value != None:
+            if page.is_minor:
+                
+            lesson = get_lesson(page, i, COURSE_FIRST_COLUMN, lessons)
             if lesson != None:
                 lessons.append(lesson)
     return lessons
 
 
-def get_lesson(ws, excelIndex, lessonColumn, lessons):
+def get_lesson(page, excelIndex, lessonColumn, lessons):
     def validate_lesson(lesson, lessons):
         if lesson.date != None:
             lesson.date = (lesson.date.split('\n'))[1]
@@ -91,12 +99,13 @@ def get_lesson(ws, excelIndex, lessonColumn, lessons):
             lesson.name = lesson.name.replace('\n', ' ')
         return lesson
 
-    time = ws["B"+excelIndex.__str__()].value.replace('\n',
+    time = page.ws["B"+excelIndex.__str__()].value.replace('\n',
                                                       ' ').replace('  ', ' ').split(' ')[1].split('-')
     start_time = time[0]
     end_time = time[1]
-    lesson = validate_lesson(Lesson(ws[lessonColumn+excelIndex.__str__(
-    )].value, start_time, end_time, ws["A"+excelIndex.__str__()].value), lessons)
+
+    lesson = validate_lesson(Lesson(page.ws[lessonColumn+excelIndex.__str__(
+    )].value, start_time, end_time, page.ws["A"+excelIndex.__str__()].value), lessons)
     return lesson
 
 

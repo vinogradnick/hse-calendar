@@ -1,6 +1,7 @@
 from __future__ import print_function
 import pickle
 import os
+import datetime
 
 import os.path
 from googleapiclient.discovery import build
@@ -25,22 +26,39 @@ def send_event(msg, start_date, stop_date):
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
         return creds
+    
+    
     service = build('calendar', 'v3', credentials=build_creds())
-    event = {
-        'summary': msg,
-        'start': {
-            'dateTime': start_date,
-            'timeZone': 'Asia/Yekaterinburg'
-        },
-        'end': {
-            'dateTime': stop_date,
-            'timeZone': 'Asia/Yekaterinburg'
-        },
-        'attendees': [
-            {'email': 'vinogradovnick32@gmail.com'}
-        ],
-    }
-    event = service.events().insert(calendarId='primary', body=event).execute()
+    # events_result = service.events().list(calendarId='primary',
+    #                                      singleEvents=True,
+    #                                     orderBy='startTime').execute()
+    # events = events_result.get('items', [])
+    # print(events)
+    if msg is not None:
+        event = {
+            'summary': msg,
+            'start': {
+                'dateTime': start_date,
+                'timeZone': 'Asia/Yekaterinburg'
+            },
+            'end': {
+                'dateTime': stop_date,
+                'timeZone': 'Asia/Yekaterinburg'
+            },
+            #'attendees': [
+            #    {'email': 'vinogradovnick32@gmail.com'}
+            #],
+            "reminders": {
+                "useDefault": False,
+                "overrides": [
+                {
+                    "method": "popup",
+                    "minutes": 10
+                }
+                ]
+            },
+        }
+    #event = service.events().insert(calendarId='primary', body=event).execute()
 
 
 def main():
